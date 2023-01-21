@@ -17,7 +17,7 @@
                     {% if cat_selected == 0 %}
                         <div class="list-group-item">Все категории</div>
                     {% else %}
-                        <a href="{% url 'products:products' %}" class="list-group-item">Все категории</a>
+                        <a href="{% url 'products:index' %}" class="list-group-item">Все категории</a>
                     {% endif %}
                     {% for category in categories %}
                         {% if cat_selected == category.pk %}
