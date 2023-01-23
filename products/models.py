@@ -1,17 +1,25 @@
 from django.db import models
 from django.urls import reverse
 from users.models import User
+from pytils.translit import slugify
 
 
 class ProductCategory(models.Model):
     name = models.CharField(max_length=128, unique=True)
     description = models.TextField(null=True, blank=True)
+    slug = models.SlugField(max_length=255, unique=True, db_index=True, verbose_name="URL")
 
     def __str__(self):
         return self.name
 
-    def get_absolute_url(self):
-        return reverse('products:category_detail', kwargs={'cat_id': self.pk})
+    def save(self, *args, **kwargs):
+        if not self.id:
+            self.slug = slugify(self.name)
+        super().save(*args, **kwargs)
+
+    class Meta:
+        verbose_name = 'category'
+        verbose_name_plural = 'categories'
 
 
 class Product(models.Model):
@@ -24,6 +32,10 @@ class Product(models.Model):
 
     def __str__(self):
         return f"Продукт: {self.name} | Категория: {self.category}"
+
+    class Meta:
+        verbose_name = 'product'
+        verbose_name_plural = 'products'
 
 
 class BasketQuerySet(models.QuerySet):
@@ -47,3 +59,7 @@ class Basket(models.Model):
 
     def sum(self):
         return self.product.price * self.quantity
+
+    class Meta:
+        verbose_name = 'basket'
+        verbose_name_plural = 'baskets'
