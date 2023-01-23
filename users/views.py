@@ -1,9 +1,10 @@
 from django.shortcuts import render, redirect
 from django.contrib import auth, messages
-from django.urls import reverse
+from django.contrib.auth.decorators import login_required
 
 from .models import User
 from .forms import UserRegistrationForm, UserLoginForm, UserProfileForm
+from products.models import Basket
 
 
 def login(request):
@@ -41,12 +42,7 @@ def registration(request):
     return render(request, 'users/register.html', context)
 
 
-def logout(request):
-    if request.method == 'POST':
-        auth.logout(request)
-        return redirect('index')
-
-
+@login_required
 def profile(request):
     if request.method == 'POST':
         form = UserProfileForm(instance=request.user, data=request.POST, files=request.FILES)
@@ -59,7 +55,15 @@ def profile(request):
     else:
         form = UserProfileForm(instance=request.user)
     context = {
-        'form': form,
         'title': 'Store - Профиль',
+        'form': form,
+        'baskets': Basket.objects.filter(user=request.user),
     }
     return render(request, 'users/profile.html', context)
+
+
+@login_required
+def logout(request):
+    if request.method == 'POST':
+        auth.logout(request)
+        return redirect('index')
