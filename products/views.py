@@ -1,29 +1,36 @@
+from django.views.generic.base import TemplateView
+from django.views.generic.list import ListView
 from django.db.models import Count
-from django.shortcuts import render, redirect
+from django.shortcuts import redirect
 from django.contrib.auth.decorators import login_required
-from django.core.paginator import Paginator
-from .models import ProductCategory, Product, Basket
+from products.models import ProductCategory, Product, Basket
 
 
-def index(request):
-    context = {
-        'title': 'Store',
-    }
-    return render(request, 'products/index.html', context)
+class IndexView(TemplateView):
+    template_name = 'products/index.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Store'
+        return context
 
 
-def products(request, category_slug=None, page_number=1):
-    products = Product.objects.filter(category__slug=category_slug) if category_slug else Product.objects.filter()
-    per_page = 3
-    paginator = Paginator(products, per_page=per_page)
-    products_paginator = paginator.page(page_number)
-    context = {
-        'title': 'Store - Каталог',
-        'categories': ProductCategory.objects.annotate(total=Count('product')).filter(total__gt=0),
-        'products': products_paginator,
-        'category_slug': category_slug,
-    }
-    return render(request, 'products/products.html', context)
+class ProductsListView(ListView):
+    template_name = 'products/products.html'
+    model = Product
+    paginate_by = 3
+
+    def get_queryset(self):
+        queryset = super(ProductsListView, self).get_queryset()
+        category_slug = self.kwargs.get('category_slug')
+        return queryset.filter(category__slug=category_slug) if category_slug else queryset
+
+    def get_context_data(self, *, object_list=None, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Store - Каталог'
+        context['categories'] = ProductCategory.objects.annotate(total=Count('product')).filter(total__gt=0)
+        context['category_slug'] = self.kwargs.get('category_slug')
+        return context
 
 
 @login_required
