@@ -1,18 +1,19 @@
 from django.contrib import admin
 from django.utils.safestring import mark_safe
 
-from users.models import User
+from users.models import User, EmailVerification
 from products.admin import BasketAdmin
 
 
 @admin.register(User)
 class UserAdmin(admin.ModelAdmin):
-    list_display = ('username', 'is_superuser', 'is_staff')
+    list_display = ('username', 'is_superuser', 'is_staff', 'is_verified_email')
     inlines = (BasketAdmin,)
     list_editable = ('is_superuser', 'is_staff')
-    fields = ('username', 'get_html_image', 'first_name', 'last_name', 'email', 'is_superuser', 'is_staff', ('last_login',
-                                                                                                             'date_joined'))
-    readonly_fields = ('username', 'last_login', 'date_joined', 'get_html_image')
+    fields = ('username', 'get_html_image', 'first_name', 'last_name', 'email', 'is_superuser', 'is_staff', 'is_verified_email',
+              ('last_login',
+               'date_joined'))
+    readonly_fields = ('username', 'last_login', 'date_joined', 'get_html_image', 'is_verified_email')
     ordering = ('id',)
     list_filter = ('is_superuser', 'is_staff',)
 
@@ -23,3 +24,10 @@ class UserAdmin(admin.ModelAdmin):
             return "Нет фото"
 
     get_html_image.short_description = "Аватар"
+
+
+@admin.register(EmailVerification)
+class EmailVerificationAdmin(admin.ModelAdmin):
+    list_display = ('code', 'user', 'expiration')
+    fields = ('code', 'user', 'expiration', 'created')
+    readonly_fields = ('created',)

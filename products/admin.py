@@ -3,10 +3,13 @@ from .models import *
 
 
 # admin.site.register(ProductCategory)
-
-
-# admin.site.register(Product)
-# admin.site.register(Basket)
+@admin.register(ProductCategory)
+class ProductCategoryAdmin(admin.ModelAdmin):
+    list_display = ('id', 'name')
+    list_display_links = ('id', 'name')
+    fields = ('name', 'description')
+    search_fields = ('name',)
+    ordering = ('id',)
 
 
 @admin.register(Product)

@@ -18,10 +18,13 @@
                         <a href="{% url 'products:index' %}" class="list-group-item">Все категории</a>
                     {% endif %}
                     {% for category in categories %}
-                        {% if category_slug == category.slug %}
-                            <div class="list-group-item">{{ category.name }}</div>
-                        {% else %}
-                            <a href="{% url 'products:category' category.slug %}" class="list-group-item">{{ category.name }}</a>
+                        {% if category.has_products %}
+                            {% if category_slug == category.slug %}
+                                <div class="list-group-item">{{ category.name }}</div>
+                            {% else %}
+                                <a href="{% url 'products:category' category.slug %}"
+                                   class="list-group-item">{{ category.name }}</a>
+                            {% endif %}
                         {% endif %}
                     {% endfor %}
 
