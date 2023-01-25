@@ -1,24 +1,23 @@
-from django.views.generic.base import TemplateView
-from django.views.generic.list import ListView
+from django.contrib.auth.decorators import login_required
 from django.db.models import Count
 from django.shortcuts import redirect
-from django.contrib.auth.decorators import login_required
-from products.models import ProductCategory, Product, Basket
+from django.views.generic.base import TemplateView
+from django.views.generic.list import ListView
+
+from common.views import CommonMixin
+from products.models import Basket, Product, ProductCategory
 
 
-class IndexView(TemplateView):
+class IndexView(CommonMixin, TemplateView):
     template_name = 'products/index.html'
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['title'] = 'Store'
-        return context
+    title = 'Store'
 
 
-class ProductsListView(ListView):
+class ProductsListView(CommonMixin, ListView):
     template_name = 'products/products.html'
     model = Product
     paginate_by = 3
+    title = 'Store - Каталог'
 
     def get_queryset(self):
         queryset = super(ProductsListView, self).get_queryset()
@@ -28,7 +27,7 @@ class ProductsListView(ListView):
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(**kwargs)
         context['title'] = 'Store - Каталог'
-        context['categories'] = ProductCategory.objects.annotate(total=Count('product')).filter(total__gt=0)
+        context['categories'] = ProductCategory.objects.annotate(has_products=Count('product'))
         context['category_slug'] = self.kwargs.get('category_slug')
         return context
 
